@@ -10,8 +10,6 @@ from typing import Any, Dict, List, Optional, Union
 from contextlib import asynccontextmanager
 
 from mcp.server.fastmcp import FastMCP, Context
-from starlette.routing import Route
-from starlette.responses import JSONResponse
 
 from .config import C4D_HOST, C4D_PORT
 from .utils import logger, check_c4d_connection
@@ -157,7 +155,7 @@ async def homepage(request):
 
 
 # Initialize our FastMCP server
-mcp = FastMCP(title="Cinema4D", routes=[Route("/", endpoint=homepage)])
+mcp = FastMCP("Cinema4D")
 
 
 @mcp.tool()
@@ -227,7 +225,7 @@ async def add_primitive(
             return f"❌ Error: {response['error']}"
 
         object_info = response.get("object", {})
-        return response
+        return f"✅ Created {primitive_type}: {object_info.get('actual_name', name or primitive_type)} (GUID: {object_info.get('guid', 'N/A')})"
 
 
 @mcp.tool()
@@ -261,9 +259,9 @@ async def modify_object(
         # Generate summary of what was modified
         modified_props = []
         for prop, value in properties.items():
-            modified_props.append(f"- **{prop}**: {value}")
+            modified_props.append(f"{prop}={value}")
 
-        return response
+        return f"✅ Modified {object_name}: {', '.join(modified_props)}"
 
 
 @mcp.tool()
@@ -289,7 +287,7 @@ async def list_objects(ctx: Context) -> str:
             indent = "  " * obj.get("depth", 0)
             object_list.append(f"{indent}- **{obj['name']}** ({obj['type']})")
 
-        return response
+        return "# Scene Objects\n" + "\n".join(object_list)
 
 
 @mcp.tool()
