@@ -901,8 +901,16 @@ async def execute_python_script(script: str, ctx: Context) -> str:
         if "error" in response:
             return f"❌ Error: {response['error']}"
 
-        result = response.get("result", "No output")
-        return response
+        output = response.get("output", "")
+        variables = response.get("variables", {})
+
+        result_parts = []
+        if output:
+            result_parts.append(output)
+        if variables:
+            result_parts.append(f"\nVariables: {variables}")
+
+        return "\n".join(result_parts) if result_parts else "Script executed successfully (no output)"
 
 
 @mcp.tool()
